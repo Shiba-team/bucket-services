@@ -150,3 +150,24 @@ func IsExistsFileInBucket(bucketname string, filename string) bool {
 	pos := findFilePosition(list, filename)
 	return pos != -1
 }
+
+func GetListBucketByUsername(username string) []model.Bucket {
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var buckets []model.Bucket
+
+	result, error := config.BucketCollection.Find(ctx, bson.M{"owner": username})
+
+	if error != nil {
+		return nil
+	}
+
+	err := result.All(ctx, &buckets)
+
+	if err != nil {
+		log.Println("GetBucketByName: ", err)
+		return nil
+	}
+
+	return buckets
+}

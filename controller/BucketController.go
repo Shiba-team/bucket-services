@@ -168,3 +168,14 @@ func GetFileFromBucket(c *gin.Context) {
 	c.Header("Content-Length", fmt.Sprintf("%d", len(data)))
 	c.Writer.Write(data) //the memory take up 1.2~1.7G
 }
+
+func GetListBucket(c *gin.Context) {
+	user := GetUser(c)
+
+	buckets := service.GetListBucketByUsername(user.Username)
+
+	c.JSON(200, gin.H{
+		"result": buckets,
+		"count":  len(buckets),
+	})
+}
