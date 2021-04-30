@@ -19,6 +19,7 @@ func setupRouter() *gin.Engine {
 		client.POST("/buckets", controller.CreateBucket)
 		client.GET("/buckets", controller.GetListBucket)
 		client.POST("/buckets/:bucket", middlewares.Authorization("write"), controller.AddFileToBucket)
+		client.GET("/buckets/:bucket", middlewares.Authorization("read"), controller.GetListFileInBucket)
 		client.GET("/buckets/:bucket/*filename", middlewares.Authorization("read"), controller.GetFileFromBucket)
 		client.DELETE("/buckets/:bucket/*filename", middlewares.Authorization("write"), controller.RemoveFileFromBucket)
 	}

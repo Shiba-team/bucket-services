@@ -22,6 +22,13 @@ func CreateBucket(c *gin.Context) {
 		return
 	}
 
+	if service.IsExistBucketName(input.BucketName) {
+		c.JSON(400, gin.H{
+			"error": "bucket name is use",
+		})
+		return
+	}
+
 	bucket := model.NewBucket(input.BucketName, user.Username)
 
 	resutl, err := service.CreateBucket(*bucket)
@@ -178,4 +185,30 @@ func GetListBucket(c *gin.Context) {
 		"result": buckets,
 		"count":  len(buckets),
 	})
+}
+
+func GetListFileInBucket(c *gin.Context) {
+	bucket_name, isName := c.Params.Get("bucket")
+
+	if !isName {
+		c.JSON(400, gin.H{
+			"error": "bucketname is required",
+		})
+		return
+	}
+
+	if !service.IsExistBucketName(bucket_name) {
+		c.JSON(400, gin.H{
+			"error": "bucket name is not found",
+		})
+		return
+	}
+
+	files := service.GetListFileOfBucket(bucket_name)
+
+	c.JSON(200, gin.H{
+		"result": files,
+		"count":  len(files),
+	})
+
 }
