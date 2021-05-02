@@ -76,7 +76,7 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-ls.json #-tokyo
-        container-name: bucket-service
+        container-name: bucket_service
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
