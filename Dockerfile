@@ -7,4 +7,4 @@ COPY . .
 # RUN go install -v ./...
 RUN go build -o app
 
-CMD ["app"]
+CMD ["./app"]
