@@ -9,7 +9,7 @@
         "logDriver": "awslogs",
         "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/bucket-services",
+          "awslogs-group": "/ecs/bucket",
           "awslogs-region": "ap-southeast-1",
           "awslogs-stream-prefix": "ecs"
         }
@@ -54,7 +54,7 @@
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "bucket-service"
+      "name": "bucket_service"
     }
   ],
   "placementConstraints": [],
@@ -64,8 +64,8 @@
     "EC2",
     "FARGATE"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:966163032495:task-definition/bucket-services:1",
-  "family": "bucket-services",
+  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:966163032495:task-definition/bucket:4",
+  "family": "bucket",
   "requiresAttributes": [
     {
       "targetId": null,
@@ -122,7 +122,6 @@
   ],
   "networkMode": "awsvpc",
   "cpu": "256",
-  "revision": 1,
   "status": "ACTIVE",
   "inferenceAccelerators": null,
   "proxyConfiguration": null,
