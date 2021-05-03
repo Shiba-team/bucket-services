@@ -46,11 +46,11 @@ jobs:
         # AWS Session Token when using temporary security credentials such as when assuming a role in AWS through STS
 #         aws_session_token: # optional
         # AWS Region
-        region: ap-southeast-1
+        region: ap-northeast-1
         # Beanstalk application name
-        application_name: bucket-app
+        application_name: bucket
         # Beanstalk environment name. If empty a version will be created but not deployed anywhere.
-        environment_name: Bucketapp-env # optional
+        environment_name: Bucket-env # optional
         # Version label for new Beanstalk version
         version_label: ${{ github.event.inputs.version_label }}
         # Version description for the new Beanstalk version
