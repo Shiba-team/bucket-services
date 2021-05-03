@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Beanstalk Deploy
+name: Deploy to Beanstalk
 
 # Controls when the action will run. 
 on:
@@ -50,7 +50,7 @@ jobs:
         # Beanstalk application name
         application_name: bucket-app
         # Beanstalk environment name. If empty a version will be created but not deployed anywhere.
-        environment_name: bucket-env # optional
+        environment_name: Bucketapp-env # optional
         # Version label for new Beanstalk version
         version_label: ${{ github.event.inputs.version_label }}
         # Version description for the new Beanstalk version
