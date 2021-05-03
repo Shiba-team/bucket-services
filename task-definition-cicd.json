@@ -64,8 +64,8 @@
     "EC2",
     "FARGATE"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:720480159010:task-definition/bucket:4",
-  "family": "bucket",
+  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:720480159010:task-definition/bucket_service:2",
+  "family": "bucket_service",
   "requiresAttributes": [
     {
       "targetId": null,
