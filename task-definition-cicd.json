@@ -10,7 +10,7 @@
         "secretOptions": null,
         "options": {
           "awslogs-group": "/ecs/bucket",
-          "awslogs-region": "us-east-1",
+          "awslogs-region": "ap-southeast-1",
           "awslogs-stream-prefix": "ecs"
         }
       },
@@ -37,7 +37,7 @@
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "720480159010.dkr.ecr.us-east-1.amazonaws.com/bucket_service:latest",
+      "image": "720480159010.dkr.ecr.ap-southeast-1.amazonaws.com/bucket_service:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -64,7 +64,7 @@
     "EC2",
     "FARGATE"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:us-east-1:720480159010:task-definition/bucket_service:2",
+  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:720480159010:task-definition/bucket_service:2",
   "family": "bucket_service",
   "requiresAttributes": [
     {
