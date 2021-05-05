@@ -14,22 +14,30 @@ import (
 )
 
 func CreateBucket(c *gin.Context) {
-	var input model.Bucket
+	bucket := getBucketInfo(c)
 
-	user := GetUser(c)
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	err := bucket.IsValidBucket()
+
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err,
+		})
 		return
 	}
 
-	if service.IsExistBucketName(input.BucketName) {
+	if service.IsExistBucketName(bucket.BucketName) {
 		c.JSON(400, gin.H{
 			"error": "bucket name is use",
 		})
 		return
 	}
 
-	bucket := model.NewBucket(input.BucketName, user.Username)
+	name, id := service.CreateBucket(*bucket)
+
+	c.JSON(200, gin.H{
+		"bucketname": name,
+		"bucketid":   id,
+	})
 
 	resutl, err := service.CreateBucket(*bucket)
 	if err != nil {
@@ -39,6 +47,20 @@ func CreateBucket(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"bucket_name": resutl})
 		return
 	}
+}
+
+func getBucketInfo(c *gin.Context) *model.Bucket {
+	var input model.Bucket
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		return nil
+	}
+
+	user := GetUser(c)
+	bucket := model.NewBucket(input.BucketName, user.Username)
+
+	return bucket
+
 }
 
 func AddFileToBucket(c *gin.Context) {

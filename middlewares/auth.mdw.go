@@ -84,5 +84,5 @@ func checkBucketOwner(bucket model.Bucket, username string) bool {
 }
 
 func checkBucketPermission(bucket model.Bucket, permission string) bool {
-	return strings.Contains(bucket.Permission, permission)
+	return strings.Contains(string(bucket.Permission), permission)
 }

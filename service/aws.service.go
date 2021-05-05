@@ -33,7 +33,7 @@ func Upload(file multipart.File, header *multipart.FileHeader, bucket_name strin
 		ContentType:          aws.String(http.DetectContentType(buffer)),
 		ContentDisposition:   aws.String("attachment"),
 		ServerSideEncryption: aws.String("AES256"),
-		StorageClass:         aws.String("INTELLIGENT_TIERING"),
+		// StorageClass:         aws.String("INTELLIGENT_TIERING"),
 	})
 
 	if err != nil {
