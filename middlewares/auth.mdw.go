@@ -5,7 +5,7 @@ import (
 	"bucket/model"
 	"bucket/service"
 	"log"
-	"strings"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,35 +41,47 @@ func Authentication() gin.HandlerFunc {
 	}
 }
 
-func Authorization(permission string) gin.HandlerFunc {
+func Authorization(permission model.Permission) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		bucket_name, _ := c.Params.Get("bucket")
+		bucketID, _ := c.Params.Get("bucketID")
 		user := controller.GetUser(c)
 
-		bucket := service.GetBucketByName(bucket_name)
+		log.Println(bucketID)
 
-		if checkBucketOwner(bucket, user.Username) {
-			c.Next()
+		if !service.GetBucketByID(bucketID, func(err string) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err,
+			})
+			c.Abort()
+		}, func(bucket model.Bucket) {
+
+			log.Printf("bucket owner: %s, username: %s", bucket.Owner, user.Username)
+			if checkBucketOwner(bucket, user.Username) {
+				c.Next()
+				return
+			}
+
+			if checkBucketStatus(bucket) && checkBucketPermission(bucket, permission) {
+				log.Println("Author")
+				c.Next()
+				return
+			}
+
+			c.JSON(http.StatusNonAuthoritativeInfo, gin.H{
+				"error": "access denied",
+			})
+			c.Abort()
+		}) {
 			return
 		}
 
-		if checkBucketStatus(bucket) && checkBucketPermission(bucket, permission) {
-			log.Println("Author")
-			c.Next()
-			return
-		}
-
-		c.JSON(403, gin.H{
-			"error": "access denied",
-		})
-		c.Abort()
 	}
 }
 
 func checkBucketStatus(bucket model.Bucket) bool {
 
-	if bucket.Status == "public" {
+	if bucket.Status == model.StatusPublic {
 		return true
 	}
 	return false
@@ -83,6 +95,6 @@ func checkBucketOwner(bucket model.Bucket, username string) bool {
 	return false
 }
 
-func checkBucketPermission(bucket model.Bucket, permission string) bool {
-	return strings.Contains(bucket.Permission, permission)
+func checkBucketPermission(bucket model.Bucket, permission model.Permission) bool {
+	return bucket.Permission == permission || bucket.Permission == model.PermissionReadAndWrite
 }
