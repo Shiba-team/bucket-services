@@ -7,12 +7,11 @@ import (
 
 func TestCreateBucket(t *testing.T) {
 
-	bucket := model.NewFullBucket("testbucketname", "testuser", "read", "private")
+	bucket := model.NewFullBucket("testbucketname", "testuser", model.PermissionReadAndWrite, model.StatusPublic)
 
-	result, err := CreateBucket(*bucket)
-
-	if err == nil && result != "testbucketname" {
+	CreateBucket(*bucket, func(err string) {
 		t.Error("bucket name different testbucketname")
-	}
+	}, func(id, name string) {
+	})
 
 }

@@ -15,11 +15,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func Upload(file multipart.File, header *multipart.FileHeader, bucket_name string) (string, error) {
+func Upload(file multipart.File, header *multipart.FileHeader, bucket_name string, filename string) (string, error) {
 	sess, _ := session.NewSession()
 	uploader := s3manager.NewUploader(sess)
 
-	filename := header.Filename
+	// filename := header.Filename
 
 	size := header.Size
 	buffer := make([]byte, size)

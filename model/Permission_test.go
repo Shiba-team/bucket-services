@@ -6,16 +6,16 @@ import (
 
 func TestIsValidPermission(t *testing.T) {
 	var p Permission
-	p = "read"
+	p = PermissionRead
 
-	if err := p.IsValidPermission(); err != nil {
+	p.IsValidPermission(func(s string) {
 		t.Fail()
-	}
+	})
 
-	p = "test"
+	p = 10
 
-	if err := p.IsValidPermission(); err == nil {
+	p.IsValidPermission(func(s string) {
 		t.Fail()
-	}
+	})
 
 }

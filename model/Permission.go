@@ -1,14 +1,19 @@
 package model
 
-import "errors"
+type Permission int
 
-type Permission string
+const (
+	PermissionRead Permission = iota
+	PermissionWrite
+	PermissionReadAndWrite
+)
 
-func (p Permission) IsValidPermission() error {
+func (p Permission) IsValidPermission(iferror func(string)) bool {
 	switch p {
-	case "read", "write", "read:write":
-		return nil
+	case PermissionRead, PermissionWrite, PermissionReadAndWrite:
+		return true
 	}
 
-	return errors.New("invalid permission")
+	iferror("invalid permission")
+	return false
 }

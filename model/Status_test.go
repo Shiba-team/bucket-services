@@ -7,18 +7,18 @@ import (
 
 func TestIsValidStatus(t *testing.T) {
 	var p Status
-	p = "public"
+	p = StatusPublic
 
-	if err := p.IsValidStatus(); err != nil {
+	p.IsValidStatus(func(err string) {
 		fmt.Print(err)
 		t.Error(err)
-	}
+	})
 
-	p = "test"
+	p = 2
 
-	if err := p.IsValidStatus(); err == nil {
+	p.IsValidStatus(func(err string) {
 		fmt.Print(err)
 		t.Error(err)
-	}
+	})
 
 }

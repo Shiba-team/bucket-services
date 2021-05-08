@@ -5,46 +5,53 @@ import (
 )
 
 func TestNewFullBucket(t *testing.T) {
-	testFullBucketSuccess := NewFullBucket("testname", "testuser", "read", "public")
+	testFullBucketSuccess := NewFullBucket("testname", "testuser", PermissionRead, StatusPublic)
 
 	if testFullBucketSuccess.BucketName != "testname" ||
 		testFullBucketSuccess.Owner != "testuser" ||
-		testFullBucketSuccess.Permission != "read" ||
-		testFullBucketSuccess.Status != "public" {
+		testFullBucketSuccess.Permission != PermissionRead ||
+		testFullBucketSuccess.Status != StatusPublic {
 		t.Fail()
 	}
 }
 
 func TestIsValidBucket(t *testing.T) {
 	testbucket := NewBucket("testbucket", "testuser")
-	if err := testbucket.IsValidBucket(); err != nil {
-		t.Fail()
-	}
+	testbucket.IsValidBucket(func(s string) {
+		{
+			t.Fail()
+		}
+	}, func() {})
 
-	testFullBucketSuccess := NewFullBucket("testname", "testuser", "read", "public")
+	testFullBucketSuccess := NewFullBucket("testname", "testuser", PermissionRead, StatusPublic)
+	testFullBucketSuccess.IsValidBucket(func(s string) {
+		{
+			t.Fail()
+		}
+	}, func() {})
 
-	if err := testFullBucketSuccess.IsValidBucket(); err != nil {
-		t.Error(err)
-	}
+	testFullBucketFailedPermission := NewFullBucket("testname", "testuser", 10, StatusPublic)
+	testFullBucketFailedPermission.IsValidBucket(func(s string) {
+		{
+			t.Fail()
+		}
+	}, func() {})
 
-	testFullBucketFailedPermission := NewFullBucket("testname", "testuser", "readad", "public")
-
-	if err := testFullBucketFailedPermission.IsValidBucket(); err == nil || err.Error() != "invalid permission" {
-		t.Error(err)
-	}
-
-	testFullBucketFailedStatus := NewFullBucket("testname", "testuser", "read", "pri")
-
-	if err := testFullBucketFailedStatus.IsValidBucket(); err == nil || err.Error() != "invalid status" {
-		t.Error(err)
-	}
+	testFullBucketFailedStatus := NewFullBucket("testname", "testuser", PermissionRead, 10)
+	testFullBucketFailedStatus.IsValidBucket(func(s string) {
+		{
+			t.Fail()
+		}
+	}, func() {})
 }
 
 func TestNewBucket(t *testing.T) {
 	testbucket := NewBucket("testbucket", "testuser")
-	if err := testbucket.IsValidBucket(); err != nil {
-		t.Fail()
-	}
+	testbucket.IsValidBucket(func(s string) {
+		{
+			t.Fail()
+		}
+	}, func() {})
 
 	if testbucket.BucketName != "testbucket" || testbucket.Owner != "testuser" {
 		t.Fail()

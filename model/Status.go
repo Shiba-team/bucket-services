@@ -1,14 +1,18 @@
 package model
 
-import "errors"
+type Status int
 
-type Status string
+const (
+	StatusPublic Status = iota
+	StatusPrivate
+)
 
-func (p Status) IsValidStatus() error {
+func (p Status) IsValidStatus(iferror func(err string)) bool {
 	switch p {
-	case "public", "private":
-		return nil
+	case StatusPublic, StatusPrivate:
+		return true
 	}
 
-	return errors.New("invalid status")
+	iferror("invalid Status Code")
+	return false
 }

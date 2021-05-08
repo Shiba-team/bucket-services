@@ -4,26 +4,114 @@ import (
 	"bucket/config"
 	"bucket/model"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func CreateBucket(bucket model.Bucket) (string, error) {
+//return iferror
+func CreateBucket(bucket model.Bucket, iferror func(err string), ifsuccess func(id string, name string)) bool {
 	if !IsExistBucketName(bucket.BucketName) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		defer cancel()
 
-		_, err := config.BucketCollection.InsertOne(ctx, bucket)
+		log.Println("bucket info: ", bucket)
+
+		result, err := config.BucketCollection.InsertOne(ctx, bucket)
 		if err != nil {
-			return "", err
+			iferror(err.Error())
+			return false
 		}
-		return bucket.BucketName, nil
+		id := result.InsertedID.(primitive.ObjectID)
+		ifsuccess(id.Hex(), bucket.BucketName)
+		return true
 	} else {
-		return "", fmt.Errorf("exists bucket name")
+		iferror("exists bucket name")
+		return false
 	}
+}
+
+func UpdateBucketPermission(bucketId string, permission model.Permission) error {
+	var err error
+	if !GetBucketByID(bucketId, func(errid string) {
+		err = errors.New(errid)
+	}, func(bucket model.Bucket) {
+		newBucket := bucket
+		newBucket.Permission = permission
+		newBucket.LastModified = time.Now()
+
+		log.Println("permission:", permission)
+		log.Println(newBucket)
+		UpdateBucket(newBucket, func(errid string) {
+			err = errors.New(errid)
+		}, func(newbucket model.Bucket) {
+			log.Println(newbucket)
+		})
+	}) {
+		return err
+	}
+	return nil
+}
+
+func UpdateBucketStatus(bucketId string, status model.Status) error {
+	var err error
+	if !GetBucketByID(bucketId, func(errid string) {
+		err = errors.New(errid)
+	}, func(bucket model.Bucket) {
+		newBucket := bucket
+		newBucket.Status = status
+		newBucket.LastModified = time.Now()
+
+		log.Println("status:", status)
+		log.Println(newBucket)
+		UpdateBucket(newBucket, func(errid string) {
+			err = errors.New(errid)
+		}, func(newbucket model.Bucket) {
+			log.Println(newbucket)
+		})
+	}) {
+		return err
+	}
+	return nil
+}
+
+// func UpdateBucket(bucket model.Bucket, iferror func(err string), ifsuccess func(newbucket model.Bucket)) bool {
+
+// }
+
+func DeleteBucket(ID string, iferror func(err string), ifsuccess func(name string)) {
+	GetBucketByID(ID, func(err string) {
+		iferror(err)
+	}, func(bucket model.Bucket) {
+		deleteBucket(bucket.ID, func(err string) {
+			iferror(err)
+		}, func(name string) {
+			ifsuccess(name)
+		})
+	})
+}
+
+func deleteBucket(ID primitive.ObjectID, iferror func(err string), ifsuccess func(name string)) bool {
+
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var bucket model.Bucket
+
+	result := config.BucketCollection.FindOneAndDelete(ctx, bson.M{"_id": ID})
+
+	err := result.Decode(&bucket)
+
+	if err != nil {
+		iferror(err.Error())
+		return false
+	}
+
+	ifsuccess(bucket.BucketName)
+	return true
 }
 
 func IsExistBucketName(bucketname string) bool {
@@ -59,11 +147,44 @@ func GetBucketByName(bucketname string) model.Bucket {
 	return bucket
 }
 
-//Get list of bucket via bucket name
-func GetListFileOfBucket(bucketname string) []model.File {
-	bucket := GetBucketByName(bucketname)
+func GetBucketByID(id string, iferror func(err string), ifsuccess func(bucket model.Bucket)) bool {
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+	var bucket model.Bucket
 
-	return bucket.ListFile
+	objectId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		iferror(err.Error())
+		return false
+	}
+
+	result := config.BucketCollection.FindOne(ctx, bson.M{"_id": objectId})
+
+	err = result.Decode(&bucket)
+
+	log.Println("err", err)
+	// log.Println(bucket)
+	if err != nil {
+		iferror(err.Error())
+		return false
+	}
+
+	ifsuccess(bucket)
+	return true
+}
+
+//Get list of bucket via bucket name
+func GetListFileOfBucket(id string) []model.File {
+	var list []model.File
+
+	GetBucketByID(id, func(err string) {
+
+	}, func(bucket model.Bucket) {
+		list = bucket.ListFile
+	})
+
+	return list
 }
 
 // add file to bucket
@@ -71,40 +192,59 @@ func AddFileToBucket(bucketname string, file model.File) (string, error) {
 
 	bucket, _, _ := addFileToDatabase(bucketname, file)
 
-	UpdateBucket(*bucket)
+	var err error
+	UpdateBucket(*bucket, func(errs string) { err = errors.New(errs) }, func(newbucket model.Bucket) {})
+	if err != nil {
+		return "", err
+	}
 	return bucket.BucketName + "/" + file.FileName, nil
 }
 
 //Add file to database in cloude
-func addFileToDatabase(bucketname string, file model.File) (*model.Bucket, string, error) {
-	bucket := GetBucketByName(bucketname)
-
-	filename, _ := createFileInDatabase(file)
-
-	if filename == "" {
-		return nil, "", fmt.Errorf("can't create file")
+func addFileToDatabase(bucketID string, file model.File) (*model.Bucket, string, error) {
+	var bucketf model.Bucket
+	var erro error
+	if GetBucketByID(bucketID, func(err string) {
+		erro = errors.New(err)
+	}, func(bucket model.Bucket) {
+		bucket.ListFile = append(bucket.ListFile, file)
+		bucketf = bucket
+	}) {
+		return &bucketf, file.FileName, nil
+	} else {
+		return nil, "", erro
 	}
 
-	file.FileName = filename
-	bucket.ListFile = append(bucket.ListFile, file)
+	//filename, _ := createFileInDatabase(file)
 
-	return &bucket, filename, nil
+	// if filename == "" {
+	// 	return nil, "", fmt.Errorf("can't create file")
+	// }
+
+	// file.FileName = filename
+
 }
 
-func UpdateBucket(bucket model.Bucket) model.Bucket {
-	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-	defer cancel()
+func UpdateBucket(bucket model.Bucket, iferror func(err string), ifsuccess func(newbucket model.Bucket)) bool {
 
-	_, err := config.BucketCollection.ReplaceOne(ctx,
-		bson.M{"bucketname": bucket.BucketName},
-		bucket,
-	)
+	return bucket.IsValidBucket(func(s string) {
+		iferror(s)
+	}, func() {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
 
-	if err != nil {
-		log.Println("GetBucketByName: ", err)
-	}
+		_, err := config.BucketCollection.ReplaceOne(ctx,
+			bson.M{"_id": bucket.ID},
+			bucket,
+		)
 
-	return bucket
+		if err != nil {
+			iferror(err.Error())
+		}
+
+		ifsuccess(bucket)
+	})
+
 }
 
 func RemoveObjectFromBucket(bucketname string, filename string) bool {
@@ -130,24 +270,24 @@ func deleteFileInDatabase(bucketname string, filename string) (bool, error) {
 
 	bucket.ListFile = append(bucket.ListFile[:pos], bucket.ListFile[pos+1:]...)
 
-	UpdateBucket(bucket)
+	UpdateBucket(bucket, func(err string) {}, func(newbucket model.Bucket) {})
 	log.Print("Deleted in database")
 	return true, nil
 }
 
-func findFilePosition(list []model.File, filename string) int {
+func findFilePosition(list []model.File, s3filename string) int {
 	for i := 0; i < len(list); i++ {
-		if list[i].FileName == filename {
+		if list[i].S3Name == s3filename {
 			return i
 		}
 	}
 	return -1
 }
 
-func IsExistsFileInBucket(bucketname string, filename string) bool {
-	list := GetListFileOfBucket(bucketname)
+func IsExistsFileInBucket(id string, s3filename string) bool {
+	list := GetListFileOfBucket(id)
 
-	pos := findFilePosition(list, filename)
+	pos := findFilePosition(list, s3filename)
 	return pos != -1
 }
 
@@ -170,4 +310,10 @@ func GetListBucketByUsername(username string) []model.Bucket {
 	}
 
 	return buckets
+}
+
+func IsExistsBucketID(id string) bool {
+	return GetBucketByID(id, func(err string) {
+		log.Println(err)
+	}, func(bucket model.Bucket) {})
 }
