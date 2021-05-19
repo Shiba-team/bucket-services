@@ -31,7 +31,7 @@ func CreateBucket(c *gin.Context) {
 			service.CreateBucket(b, ifError, func(id, name string) {
 				c.JSON(http.StatusOK, gin.H{
 					"bucketname": name,
-					"id":         id,
+					"_id":        id,
 				})
 			})
 		})
@@ -198,17 +198,17 @@ func AddFileToBucket(c *gin.Context) {
 	s3filename += path.Ext(filename)
 
 	// upload to S3
-	path, _ := service.Upload(file, header, ID, s3filename)
+	path, err := service.Upload(file, header, ID, s3filename)
 	//---------------------------------
-	// if err != nil {
-	// 	log.Println("error", err)
-	// 	c.JSON(500, gin.H{
-	// 		"error": "Failed to upload file",
-	// 	})
-	// 	return
-	// }
+	if err != nil {
+		log.Println("error", err)
+		c.JSON(500, gin.H{
+			"error": "Failed to upload file",
+		})
+		return
+	}
 	//---------------------------------
-
+	log.Println("path: ", path)
 	// key := filepath.Join(ID, file_name)
 	hostname := os.Getenv("HOST")
 	downloadPath := hostname + "/4/" + ID + "/0/" + s3filename

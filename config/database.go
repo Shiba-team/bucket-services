@@ -13,11 +13,13 @@ import (
 
 //Client Database instance
 
-var BucketCollection, FileCollection *mongo.Collection
+var BucketCollection *mongo.Collection
 
 func ConnectDatabase() {
+	log.Println("connect db")
 	MongoDb := os.Getenv("MONGODB_URL")
-	fmt.Println(MongoDb)
+
+	log.Println(MongoDb)
 	Client, err := mongo.NewClient(options.Client().ApplyURI(MongoDb))
 	if err != nil {
 		log.Fatal(err)
@@ -33,5 +35,4 @@ func ConnectDatabase() {
 	fmt.Println("Connected to MongoDB!")
 
 	BucketCollection = Client.Database("storage").Collection("bucket")
-	FileCollection = Client.Database("storage").Collection("file")
 }

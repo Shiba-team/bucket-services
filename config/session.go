@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/joho/godotenv"
 )
 
 var AccessKeyID string
@@ -14,7 +13,6 @@ var SecretAccessKey string
 var MyRegion string
 
 func ConnectAws() *session.Session {
-	godotenv.Load()
 	AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
 	SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 	MyRegion = os.Getenv("AWS_REGION")

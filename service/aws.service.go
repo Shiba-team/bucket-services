@@ -58,6 +58,7 @@ func Download(key string) []byte {
 		log.Fatal(err)
 	}
 
+	log.Println("key", key)
 	// Write the contents of S3 Object to the file
 	n, err := downloader.Download(f, &s3.GetObjectInput{
 		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
