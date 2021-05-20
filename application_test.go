@@ -229,6 +229,13 @@ func TestAddFileToBucket(t *testing.T) {
 	assert.Equal(t, 200, wt.Code)
 
 	log.Println(wt.Body.String())
+	service.GetBucketByID(testbucketid, func(err string) {
+		t.Error(err)
+	}, func(bucket model.Bucket) {
+		log.Print("list file: ", bucket.ListFile)
+		assert.Equal(t, 1, len(bucket.ListFile))
+	})
+
 }
 
 func TestDeleteBucket(t *testing.T) {
