@@ -247,32 +247,50 @@ func UpdateBucket(bucket model.Bucket, iferror func(err string), ifsuccess func(
 
 }
 
-func RemoveObjectFromBucket(bucketname string, filename string) bool {
+func RemoveObjectFromBucket(bucketID string, filename string) bool {
 	log.Print("Removing in database")
-	ok, _ := deleteFileInDatabase(bucketname, filename)
+	ok, id, _ := deleteFileInDatabase(bucketID, filename)
 	if ok {
-		log.Print(" Removing in s3")
-		deleteObject(bucketname, filename)
+		fileID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return false
+		}
+		ferr := DeleteFile(fileID)
+		if ferr != nil {
+			log.Print("Remove Object ", ferr)
+			return false
+		}
 	}
 	return ok
 }
 
-func deleteFileInDatabase(bucketname string, filename string) (bool, error) {
+func deleteFileInDatabase(bucketID string, filename string) (bool, string, error) {
 
 	log.Print("Removing in database...")
-	bucket := GetBucketByName(bucketname)
+	var bucket model.Bucket
+	var er error
+	GetBucketByID(bucketID, func(err string) {
+		er = errors.New(err)
+	}, func(rbucket model.Bucket) {
+		bucket = rbucket
+	})
+
+	if er != nil {
+		return false, "", er
+	}
 
 	pos := findFilePosition(bucket.ListFile, filename)
 	if pos == -1 {
 		log.Print("file not found")
-		return false, fmt.Errorf("unable to find filename")
+		return false, "", fmt.Errorf("unable to find filename")
 	}
 
+	deletedFileID := bucket.ListFile[pos].FileID
 	bucket.ListFile = append(bucket.ListFile[:pos], bucket.ListFile[pos+1:]...)
 
 	UpdateBucket(bucket, func(err string) {}, func(newbucket model.Bucket) {})
 	log.Print("Deleted in database")
-	return true, nil
+	return true, deletedFileID, nil
 }
 
 func findFilePosition(list []model.File, s3filename string) int {

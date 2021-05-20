@@ -15,7 +15,7 @@ func RandomHex(n int) (string, error) {
 }
 
 type File struct {
-	FileLink     string     `json:"filelink"  bson:"filelink"`
+	FileID       string     `json:"fileid"  bson:"fileid"`
 	DownloadLink string     `json:"downloadlink"  bson:"downloadlink"`
 	CreatedBy    string     `json:"createdby" bson:"createdby"`
 	FileName     string     `json:"filename" bson:"filename"`
@@ -27,10 +27,10 @@ type File struct {
 	Size         int64      `json:"size" bson:"size"`
 }
 
-func NewFile(filename string, filelink string, username string) File {
+func NewFile(filename string, fileID string, username string) File {
 	var f File
 	f.FileName = filename
-	f.FileLink = filelink
+	f.FileID = fileID
 	f.CreatedAt = time.Now()
 	f.CreatedBy = username
 	f.LastModify = time.Now()

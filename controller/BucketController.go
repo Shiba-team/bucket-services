@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func CreateBucket(c *gin.Context) {
@@ -173,7 +174,7 @@ func AddFileToBucket(c *gin.Context) {
 	// 	return
 	// }
 
-	_, header, err := c.Request.FormFile("file")
+	file, header, err := c.Request.FormFile("file")
 	filename := c.Request.FormValue("filename")
 	if filename == "" {
 		filename = header.Filename
@@ -181,6 +182,10 @@ func AddFileToBucket(c *gin.Context) {
 
 	if err != nil {
 		log.Println(err)
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 
 	// if service.IsExistsFileInBucket(ID, filename) {
@@ -198,6 +203,21 @@ func AddFileToBucket(c *gin.Context) {
 	s3filename += path.Ext(filename)
 
 	// // upload to S3
+
+	bfile := make([]byte, header.Size)
+	n, ferr := file.Read(bfile)
+
+	if ferr != nil {
+		c.JSON(500, gin.H{
+			"message": ferr,
+		})
+	}
+
+	log.Print("file header size: ", header.Size)
+	log.Print("len file", n)
+
+	fileID := service.UploadFile(bfile, s3filename)
+
 	// path, err := service.Upload(file, header, ID, s3filename)
 	// //---------------------------------
 	// if err != nil {
@@ -214,7 +234,7 @@ func AddFileToBucket(c *gin.Context) {
 	downloadPath := hostname + "/4/" + ID + "/0/" + s3filename
 	f := model.File{
 		FileName:     filename,
-		FileLink:     "",
+		FileID:       fileID,
 		S3Name:       s3filename,
 		DownloadLink: downloadPath,
 		CreatedAt:    time.Now(),
@@ -235,12 +255,12 @@ func AddFileToBucket(c *gin.Context) {
 
 func RemoveFileFromBucket(c *gin.Context) {
 	log.Print("Remove File...")
-	bucket_name, _ := c.Params.Get("bucketID")
+	bucketID, _ := c.Params.Get("bucketID")
 	filepathname, _ := c.Params.Get("filename")
 
 	s3filename := path.Base(filepathname)
 
-	if !service.IsExistBucketName(bucket_name) {
+	if !service.IsExistsBucketID(bucketID) {
 		log.Print(" bucket not found")
 		c.JSON(400, gin.H{
 			"error": "bucket name is not found",
@@ -248,7 +268,7 @@ func RemoveFileFromBucket(c *gin.Context) {
 		return
 	}
 
-	if !service.IsExistsFileInBucket(bucket_name, s3filename) {
+	if !service.IsExistsFileInBucket(bucketID, s3filename) {
 		log.Print(" file not found")
 		c.JSON(400, gin.H{
 			"error": "file is not found",
@@ -257,7 +277,8 @@ func RemoveFileFromBucket(c *gin.Context) {
 	}
 
 	log.Print("Removing...")
-	s := service.RemoveObjectFromBucket(bucket_name, s3filename)
+	s := service.RemoveObjectFromBucket(bucketID, s3filename)
+	
 	if s {
 		c.JSON(200, gin.H{
 			"message": s3filename + " has removed",
@@ -279,7 +300,7 @@ func GetFileFromBucket(c *gin.Context) {
 
 	s3filename := path.Base(filepathname)
 
-	log.Print(s3filename)
+	log.Print("s3 filename: ", s3filename)
 
 	// if !service.IsExistsBucketID(ID) {
 	// 	log.Print(" bucket not found")
@@ -310,8 +331,9 @@ func GetFileFromBucket(c *gin.Context) {
 		}
 
 		// _ = service.GetBucketByName(ID)
+		FileID, _ := primitive.ObjectIDFromHex(file.FileID)
 
-		data := service.Download(file.FileLink)
+		data := service.DownloadFile(FileID)
 
 		c.Writer.WriteHeader(http.StatusOK)
 		c.Writer.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file.FileName))

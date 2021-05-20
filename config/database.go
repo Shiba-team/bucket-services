@@ -36,3 +36,17 @@ func ConnectDatabase() {
 
 	BucketCollection = Client.Database("storage").Collection("bucket")
 }
+
+func InitiateMongoClient() *mongo.Client {
+	MongoDb := os.Getenv("MONGODB_URL")
+	var err error
+	var client *mongo.Client
+	uri := MongoDb
+	opts := options.Client()
+	opts.ApplyURI(uri)
+	opts.SetMaxPoolSize(5)
+	if client, err = mongo.Connect(context.Background(), opts); err != nil {
+		fmt.Println(err.Error())
+	}
+	return client
+}

@@ -6,7 +6,7 @@ import (
 	"bucket/service"
 	"bytes"
 	"encoding/json"
-	"io"
+	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var testbucketid string
@@ -196,15 +197,23 @@ func TestAddFileToBucket(t *testing.T) {
 		return
 	}
 
+	//test
+	data, _ := ioutil.ReadAll(f)
+
+	log.Println("file size n:", len(data))
+
 	defer f.Close()
 	fw, err := w.CreateFormFile("file", "testfile.txt")
 	if err != nil {
 		return
 	}
 
-	if _, err = io.Copy(fw, f); err != nil {
+	if _, err = fw.Write(data); err != nil {
 		return
 	}
+	// if _, err = io.Copy(fw, f); err != nil {
+	// 	return
+	// }
 
 	// Add the other fields
 	if fw, err = w.CreateFormField("filename"); err != nil {
@@ -217,6 +226,7 @@ func TestAddFileToBucket(t *testing.T) {
 	// If you don't close it, your request will be missing the terminating boundary.
 	w.Close()
 
+	log.Println("len b: ", len(b.Bytes()))
 	// Now that you have a form, you can submit it to your handler.
 	req, err := http.NewRequest("POST", host, &b)
 	if err != nil {
@@ -228,13 +238,17 @@ func TestAddFileToBucket(t *testing.T) {
 	router.ServeHTTP(wt, req)
 	assert.Equal(t, 200, wt.Code)
 
-	log.Println(wt.Body.String())
+	log.Println("res body:", wt.Body.String())
 	service.GetBucketByID(testbucketid, func(err string) {
 		t.Error(err)
 	}, func(bucket model.Bucket) {
 		log.Print("list file: ", bucket.ListFile)
 		assert.Equal(t, 1, len(bucket.ListFile))
 	})
+
+	objectId, _ := primitive.ObjectIDFromHex("60a6654c586be7718067877c")
+
+	service.DownloadFile(objectId)
 
 }
 
