@@ -87,12 +87,30 @@ func DeleteBucket(ID string, iferror func(err string), ifsuccess func(name strin
 	GetBucketByID(ID, func(err string) {
 		iferror(err)
 	}, func(bucket model.Bucket) {
-		deleteBucket(bucket.ID, func(err string) {
-			iferror(err)
-		}, func(name string) {
-			ifsuccess(name)
-		})
+		err := deleteFileInBucket(bucket.ListFile)
+		if err != nil {
+			log.Print("DeleteBucket: error when delete file in bucket: ", err)
+		} else {
+			deleteBucket(bucket.ID, func(err string) {
+				iferror(err)
+			}, func(name string) {
+				ifsuccess(name)
+			})
+		}
+
 	})
+}
+
+func deleteFileInBucket(files []model.File) error {
+	for i := 0; i < len(files); i++ {
+		FileID, err := primitive.ObjectIDFromHex(files[i].FileID)
+		if err != nil {
+			log.Print("deleteFileBucket: ", err)
+			return err
+		}
+		DeleteFile(FileID)
+	}
+	return nil
 }
 
 func deleteBucket(ID primitive.ObjectID, iferror func(err string), ifsuccess func(name string)) bool {

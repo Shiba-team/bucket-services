@@ -18,19 +18,23 @@ func setupRouter() *gin.Engine {
 
 	client := r.Group("/4")
 	{
-		client.POST("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), controller.CreateBucket)                                                                                   // create bucket
-		client.GET("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), controller.GetListBucket)                                                                                   // get list bucket of user
-		client.POST("/:bucketID", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.AddFileToBucket)                    // add file to bucket
-		client.PATCH("/:bucketID", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.UpdateBucketPermissionAndStatus)   // update bucket permission and status
-		client.DELETE("/:bucketID", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.DeleteBucket)                     // delete bucket
-		client.GET("/:bucketID", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetBucket)                            // Get bucket infomation
-		client.GET("/:bucketID/1", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetBucketSize)                      // get size of bucket
-		client.GET("/:bucketID/2", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetListFileInBucket)                // get list file of bucket
-		client.GET("/:bucketID/1/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetFileInfoFromBucket)    // getfile infomation
-		client.GET("/:bucketID/0/*filename", middlewares.Authentication(middlewares.UN_REQUIRED), middlewares.FilePermission(model.PermissionRead), controller.GetFileFromBucket)           // download file
-		client.PATCH("/:bucketID/2/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.UpdateFilePermission)   // change file permission
-		client.PATCH("/:bucketID/3/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.UpdateFileStatus)       // change file status
-		client.DELETE("/:bucketID/4/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.RemoveFileFromBucket) // delete file in bucket
+		client.POST("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), controller.CreateBucket) // create bucket
+		client.GET("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), controller.GetListBucket) // get list bucket of user
+		bucket := client.Group("/:bucketID")
+		{
+			bucket.GET("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetBucket)                            // Get bucket infomation
+			bucket.POST("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.AddFileToBucket)                    // add file to bucket
+			bucket.PATCH("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.UpdateBucketPermissionAndStatus)   // update bucket permission and status
+			bucket.DELETE("", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.DeleteBucket)                     // delete bucket
+			bucket.GET("/1", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetBucketSize)                      // get size of bucket
+			bucket.GET("/2", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetListFileInBucket)                // get list file of bucket
+			bucket.GET("/1/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.GetFileInfoFromBucket)    // getfile infomation
+			bucket.GET("/0/*filename", middlewares.Authentication(middlewares.UN_REQUIRED), middlewares.FilePermission(model.PermissionRead), controller.GetFileFromBucket)           // download file
+			bucket.PATCH("/2/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.UpdateFilePermission)   // change file permission
+			bucket.PATCH("/3/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionRead), controller.UpdateFileStatus)       // change file status
+			bucket.DELETE("/4/*filename", middlewares.Authentication(middlewares.AUTHEN_REQUIRED), middlewares.Authorization(model.PermissionWrite), controller.RemoveFileFromBucket) // delete file in bucket
+		}
+
 	}
 
 	return r
@@ -45,7 +49,6 @@ func LoadEnv() {
 
 func main() {
 	LoadEnv()
-	config.ConnectAws()
 	config.ConnectDatabase()
 
 	port := os.Getenv("PORT")
