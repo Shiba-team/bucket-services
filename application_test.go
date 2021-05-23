@@ -15,10 +15,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var testbucketid string
+var downloadlink string
+var bucketSize int64
 
 func TestGetAllUser(t *testing.T) {
 	LoadEnv()
@@ -201,6 +202,7 @@ func TestAddFileToBucket(t *testing.T) {
 	data, _ := ioutil.ReadAll(f)
 
 	log.Println("file size n:", len(data))
+	bucketSize = int64(len(data))
 
 	defer f.Close()
 	fw, err := w.CreateFormFile("file", "testfile.txt")
@@ -246,10 +248,84 @@ func TestAddFileToBucket(t *testing.T) {
 		assert.Equal(t, 1, len(bucket.ListFile))
 	})
 
-	objectId, _ := primitive.ObjectIDFromHex("60a6654c586be7718067877c")
+	type resresult struct {
+		Filepath string `json:"filepath"`
+	}
+	var result resresult
+	rerr := json.Unmarshal(wt.Body.Bytes(), &result)
+	if rerr != nil {
+		log.Println(rerr.Error())
+		t.Error("Response type Error!")
+	}
 
-	service.DownloadFile(objectId)
+	downloadlink = result.Filepath
+}
+func TestDownloadFile(t *testing.T) {
+	LoadEnv()
+	config.ConnectDatabase()
+	router := setupRouter()
 
+	host := downloadlink
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("GET", host, nil)
+	req.Header.Set("x-auth-token", "abc")
+	router.ServeHTTP(w, req)
+
+	assert.EqualValues(t, len(w.Body.Bytes()), bucketSize)
+}
+
+func TestGetBucketSize(t *testing.T) {
+	LoadEnv()
+	config.ConnectDatabase()
+	router := setupRouter()
+
+	host := os.Getenv("HOST") + "/4/" + testbucketid + "/1"
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("GET", host, nil)
+	req.Header.Set("x-auth-token", "abc")
+	router.ServeHTTP(w, req)
+
+	type bucketsize struct {
+		Bucketsize int64 `json:"bucketsize"`
+	}
+	var result bucketsize
+	rerr := json.Unmarshal(w.Body.Bytes(), &result)
+	if rerr != nil {
+		log.Println(rerr.Error())
+		t.Error("Response type Error!")
+	}
+
+	assert.Equal(t, result.Bucketsize, bucketSize)
+}
+
+func TestGetListFile(t *testing.T) {
+	LoadEnv()
+	config.ConnectDatabase()
+	router := setupRouter()
+
+	host := os.Getenv("HOST") + "/4/" + testbucketid + "/2"
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("GET", host, nil)
+	req.Header.Set("x-auth-token", "abc")
+	router.ServeHTTP(w, req)
+
+	type list struct {
+		Count int64 `json:"count"`
+	}
+	var result list
+	rerr := json.Unmarshal(w.Body.Bytes(), &result)
+	if rerr != nil {
+		log.Println(rerr.Error())
+		t.Error("Response type Error!")
+	}
+
+	assert.EqualValues(t, result.Count, 1)
 }
 
 func TestDeleteBucket(t *testing.T) {

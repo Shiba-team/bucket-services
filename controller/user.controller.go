@@ -10,6 +10,6 @@ import (
 func GetUser(c *gin.Context) model.User {
 	i, _ := c.Get("user")
 	u, issuccess := i.(model.User)
-	log.Println(issuccess)
+	log.Println("get user: ", issuccess)
 	return u
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"bucket/config"
+	"bucket/model"
 	"bytes"
 	"context"
 	"fmt"
@@ -71,8 +72,8 @@ func UploadFile(data []byte, filename string) string {
 		conn.Database("myfiles"),
 	)
 	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+		log.Print("Upload File: ", err)
+		return ""
 	}
 
 	FileID := primitive.NewObjectID()
@@ -82,15 +83,13 @@ func UploadFile(data []byte, filename string) string {
 	// 	filename,
 	// )
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Print("error when upload: ", err)
 	}
 	defer uploadStream.Close()
 
 	fileSize, err := uploadStream.Write(data)
 	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+		log.Print("Upload file: ", "Write data: ", err)
 	}
 	log.Printf("Write file to DB was successful. File %s size: %d M\n", FileID.Hex(), fileSize)
 	return FileID.Hex()
@@ -101,7 +100,9 @@ func DownloadFile(ID primitive.ObjectID) []byte {
 	// For CRUD operations, here is an example
 	db := conn.Database("myfiles")
 	fsFiles := db.Collection("fs.files")
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	defer cancel()
 	var results bson.M
 	err := fsFiles.FindOne(ctx, bson.M{}).Decode(&results)
 	if err != nil {
@@ -132,11 +133,12 @@ func DeleteFile(ID primitive.ObjectID) error {
 	// check file
 	db := conn.Database("myfiles")
 	fsFiles := db.Collection("fs.files")
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	var results bson.M
 	err := fsFiles.FindOne(ctx, bson.M{}).Decode(&results)
 	if err != nil {
-		log.Fatal(err)
+		log.Print("error when search file: ", err)
 	}
 	// you can print out the results
 	fmt.Println(results)
@@ -151,4 +153,14 @@ func DeleteFile(ID primitive.ObjectID) error {
 
 	log.Println("File ID: ", ID)
 	return bucket.Delete(ID)
+}
+
+func GetFileInBucket(bucketID, filename string) model.File {
+	files := GetListFileOfBucket(bucketID)
+	for i := 0; i < len(files); i++ {
+		if files[i].S3Name == filename {
+			return files[i]
+		}
+	}
+	return model.File{}
 }
