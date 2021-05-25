@@ -242,7 +242,7 @@ Success: `200`
 ### Status Code
 Success: `200`
 ### Example Body 
-see [permission](https://github.com/Shiba-team/bucket-services/new/master?readme=1#example-body-2)
+see [permission](https://github.com/Shiba-team/bucket-services#example-body-2)
 ```json
 {
     "permission":2
@@ -261,7 +261,7 @@ see [permission](https://github.com/Shiba-team/bucket-services/new/master?readme
 ### Status Code
 Success: `200`
 ### Example Body 
-see [status](https://github.com/Shiba-team/bucket-services/new/master?readme=1#example-body-2)
+see [status](https://github.com/Shiba-team/bucket-services#example-body-2)
 ```json
 {
     "status":1
