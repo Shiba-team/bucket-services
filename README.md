@@ -225,6 +225,7 @@ Success: `200`
     "permission": 2,
     "size": 5737
 }
+```
 ------------------------------------------------------------------------------------------
 ## Download File In Bucket
 Download file needn't `Authorization` if it is `directlink` (Status = 0 and Permission = 0)
