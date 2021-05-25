@@ -6,19 +6,19 @@ Always put Header for all request
 ```
 ---------
 # List Function
-+ [Create Bucket](https://github.com/Shiba-team/bucket-services/master?readme=1#create-bucket)
-+ [Get List Bucket Of User](https://github.com/Shiba-team/bucket-services/new/master?readme=1#create-bucket)
-+ [Get Bucket Infomation]()
-+ [Add File To Bucket](https://github.com/Shiba-team/bucket-services/master?readme=1#create-bucket)
-+ [Update Bucket Permission And Status]()
-+ [Delete Bucket]()
-+ [Get Bucket's Size]()
-+ [Get Files In Bucket]()
-+ [Get File Information]()
-+ [Download File]()
-+ [Update File Permission]()
-+ [Update File Status]()
-+ [Delete File]()
++ [Create Bucket](https://github.com/Shiba-team/bucket-services#create-bucket)
++ [Get List Bucket Of User](https://github.com/Shiba-team/bucket-services#get-users-buckets)
++ [Get Bucket Infomation](https://github.com/Shiba-team/bucket-services#get-bucket-information)
++ [Add File To Bucket](https://github.com/Shiba-team/bucket-services#add-file-to-bucket)
++ [Update Bucket Permission And Status](https://github.com/Shiba-team/bucket-services#update-bucket-permission-and-status)
++ [Delete Bucket](https://github.com/Shiba-team/bucket-services#delete-bucket)
++ [Get Bucket's Size](https://github.com/Shiba-team/bucket-services#get-size-of-bucket)
++ [Get Files In Bucket](https://github.com/Shiba-team/bucket-services#get-list-file-of-bucket)
++ [Get File Information](https://github.com/Shiba-team/bucket-services#get-file-info)
++ [Download File](https://github.com/Shiba-team/bucket-services#download-file-in-bucket)
++ [Update File Permission](https://github.com/Shiba-team/bucket-services#change-file-permission)
++ [Update File Status](https://github.com/Shiba-team/bucket-services#change-file-status)
++ [Delete File](https://github.com/Shiba-team/bucket-services#delete-file)
 ---------
 ## Create Bucket
 ### Method
@@ -203,6 +203,7 @@ Success: `200`
         }
     ]
 }
+```
 ------------------------------------------------------------------------------------------
 ## Get File Info
 ### Method
