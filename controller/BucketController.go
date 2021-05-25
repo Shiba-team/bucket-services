@@ -278,7 +278,7 @@ func RemoveFileFromBucket(c *gin.Context) {
 
 	log.Print("Removing...")
 	s := service.RemoveObjectFromBucket(bucketID, s3filename)
-	
+
 	if s {
 		c.JSON(200, gin.H{
 			"message": s3filename + " has removed",
@@ -347,12 +347,26 @@ func GetFileFromBucket(c *gin.Context) {
 func GetListBucket(c *gin.Context) {
 	user := GetUser(c)
 
-	buckets := service.GetListBucketByUsername(user.Username)
+	buckets, err := service.GetListBucketByUsername(user.Username)
 
-	c.JSON(200, gin.H{
-		"result": buckets,
-		"count":  len(buckets),
-	})
+	if err != nil {
+		log.Print("GetListBucket: error when getlist: ", err)
+		if err.Error() == "mongo: no documents in result" {
+			c.JSON(200, gin.H{
+				"result": []model.Bucket{},
+				"count":  0,
+			})
+		} else {
+			c.JSON(400, gin.H{
+				"error": err,
+			})
+		}
+	} else {
+		c.JSON(200, gin.H{
+			"result": buckets,
+			"count":  len(buckets),
+		})
+	}
 }
 
 func GetFileInfoFromBucket(c *gin.Context) {

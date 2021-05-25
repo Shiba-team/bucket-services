@@ -21,7 +21,10 @@ const (
 func Authentication(options Options) gin.HandlerFunc {
 	if options == AUTHEN_REQUIRED {
 		return func(c *gin.Context) {
-			token := c.Request.Header.Get("x-auth-token")
+			header := c.Request.Header
+
+			// past
+			token := c.Request.Header.Get("Authorization")
 			if token == "" {
 				log.Println("unAuth")
 				c.JSON(400, gin.H{
@@ -32,7 +35,7 @@ func Authentication(options Options) gin.HandlerFunc {
 			}
 			log.Println("Token", token)
 
-			user, err := service.VerifyUser(token)
+			user, err := service.VerifyUser(header)
 
 			if err != nil {
 				log.Println("unAuth")
@@ -50,12 +53,15 @@ func Authentication(options Options) gin.HandlerFunc {
 	}
 	if options == UN_REQUIRED {
 		return func(c *gin.Context) {
-			token := c.Request.Header.Get("x-auth-token")
+			header := c.Request.Header
+
+			// past
+			token := c.Request.Header.Get("Authorization")
 			if token == "" {
 				log.Println("unAuth")
 			} else {
 				log.Println("Token", token)
-				user, err := service.VerifyUser(token)
+				user, err := service.VerifyUser(header)
 				if err == nil {
 					log.Println("Auth")
 					c.Set("user", user)

@@ -31,7 +31,8 @@ func TestGetAllUser(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", host, nil)
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -75,7 +76,8 @@ func TestCreateBucket(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("POST", host, bytes.NewBuffer(body))
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -109,7 +111,8 @@ func TestChangePermission(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", host, nil)
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	var resultBucket model.Bucket
@@ -130,7 +133,8 @@ func TestGetBucket(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", host, nil)
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	var resultBucket model.Bucket
@@ -163,7 +167,8 @@ func TestUpdateBucket(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("PATCH", host, bytes.NewBuffer(body))
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
@@ -236,7 +241,8 @@ func TestAddFileToBucket(t *testing.T) {
 	}
 	// Don't forget to set the content type, this will contain the boundary.
 	req.Header.Set("Content-Type", w.FormDataContentType())
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(wt, req)
 	assert.Equal(t, 200, wt.Code)
 
@@ -270,7 +276,8 @@ func TestDownloadFile(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", host, nil)
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	assert.EqualValues(t, len(w.Body.Bytes()), bucketSize)
@@ -286,7 +293,8 @@ func TestGetBucketSize(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", host, nil)
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	type bucketsize struct {
@@ -312,7 +320,8 @@ func TestGetListFile(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", host, nil)
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	type list struct {
@@ -338,7 +347,8 @@ func TestDeleteBucket(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("DELETE", host, nil)
-	req.Header.Set("x-auth-token", "abc")
+	req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjIyMTMzNjM1LCJpYXQiOjE2MjE5NjA4MzV9.hXhTfEnEfDyS0yuzuqD3pvlUkXrjXjj0sAX5Fd5Tdxw")
+
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)

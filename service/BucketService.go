@@ -327,25 +327,26 @@ func IsExistsFileInBucket(id string, s3filename string) bool {
 	return pos != -1
 }
 
-func GetListBucketByUsername(username string) []model.Bucket {
+func GetListBucketByUsername(username string) ([]model.Bucket, error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 	var buckets []model.Bucket
 
-	result, error := config.BucketCollection.Find(ctx, bson.M{"owner": username})
+	result, erro := config.BucketCollection.Find(ctx, bson.M{"owner": username})
 
-	if error != nil {
-		return nil
+	if erro != nil {
+		log.Print("GetListBucketByUsername: error when find username", erro)
+		return nil, erro
 	}
 
 	err := result.All(ctx, &buckets)
 
 	if err != nil {
 		log.Println("GetBucketByName: ", err)
-		return nil
+		return nil, err
 	}
 
-	return buckets
+	return buckets, nil
 }
 
 func IsExistsBucketID(id string) bool {
