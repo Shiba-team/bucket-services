@@ -6,10 +6,10 @@ Always put Header for all request
 ```
 ---------
 # List Function
-+ [Create Bucket](https://github.com/Shiba-team/bucket-services/new/master?readme=1#create-bucket)
++ [Create Bucket](https://github.com/Shiba-team/bucket-services/master?readme=1#create-bucket)
 + [Get List Bucket Of User](https://github.com/Shiba-team/bucket-services/new/master?readme=1#create-bucket)
 + [Get Bucket Infomation]()
-+ [Add File To Bucket](https://github.com/Shiba-team/bucket-services/new/master?readme=1#create-bucket)
++ [Add File To Bucket](https://github.com/Shiba-team/bucket-services/master?readme=1#create-bucket)
 + [Update Bucket Permission And Status]()
 + [Delete Bucket]()
 + [Get Bucket's Size]()
