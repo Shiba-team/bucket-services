@@ -250,6 +250,7 @@ func AddFileToBucket(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"filepath": downloadPath,
+		"filename": path.Base(downloadPath),
 	})
 }
 
